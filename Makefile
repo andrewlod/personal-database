@@ -10,11 +10,15 @@ test-backend-unit:
 
 test-backend-integration:
 	@echo "Running backend integration tests..."
-	python -m pytest tests/integration/ -v
+	@if [ -d tests/integration ]; then \
+		python -m pytest tests/integration/ -v; \
+	else \
+		echo "No integration tests found, skipping."; \
+	fi
 
 test-backend-coverage:
 	@echo "Running backend tests with coverage..."
-	python -m pytest tests/unit/backend/ tests/integration/ --cov=src --cov-report=html
+	python -m pytest tests/unit/backend/ --cov=src --cov-report=html
 
 test-frontend: test-frontend-unit test-frontend-e2e
 

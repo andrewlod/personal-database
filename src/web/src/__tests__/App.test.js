@@ -1,8 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import axios from 'axios';
 import App from '../App';
+
+/* eslint-disable testing-library/no-node-access */
 
 jest.mock('axios');
 jest.mock('react-markdown', () => {
@@ -13,6 +15,11 @@ jest.mock('react-markdown', () => {
 });
 
 const mockAxiosPost = axios.post;
+
+const submitForm = (container) => {
+  const form = container.querySelector('form');
+  fireEvent.submit(form);
+};
 
 describe('App', () => {
   beforeEach(() => {
@@ -78,11 +85,11 @@ describe('App', () => {
         },
       });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       expect(screen.getByText('What is this?')).toBeInTheDocument();
     });
@@ -96,11 +103,11 @@ describe('App', () => {
         },
       });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       expect(input.value).toBe('');
     });
@@ -110,11 +117,11 @@ describe('App', () => {
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
@@ -128,11 +135,11 @@ describe('App', () => {
         },
       });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(screen.getByText('This is the answer')).toBeInTheDocument();
@@ -144,11 +151,11 @@ describe('App', () => {
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       const sendButton = screen.getByRole('button', { name: /thinking/i });
       expect(sendButton).toBeDisabled();
@@ -177,17 +184,25 @@ describe('App', () => {
         },
       });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(screen.getByText('Sources (2):')).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(screen.getByText('Source Document 1')).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(screen.getByText('Source Document 2')).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(screen.getByText(/Relevance: 95%/)).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(screen.getByText(/This is a preview/)).toBeInTheDocument();
       });
     });
@@ -201,16 +216,16 @@ describe('App', () => {
         },
       });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(screen.getByText('Here is the answer')).toBeInTheDocument();
-        expect(screen.queryByText(/Sources/)).not.toBeInTheDocument();
       });
+      expect(screen.queryByText(/Sources/)).not.toBeInTheDocument();
     });
   });
 
@@ -224,11 +239,11 @@ describe('App', () => {
         },
       });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(screen.getByText('(3.7s)')).toBeInTheDocument();
@@ -240,11 +255,11 @@ describe('App', () => {
     it('shows error alert when API call fails', async () => {
       mockAxiosPost.mockRejectedValueOnce(new Error('Network error'));
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(
@@ -256,11 +271,11 @@ describe('App', () => {
     it('adds error bot message to chat on API failure', async () => {
       mockAxiosPost.mockRejectedValueOnce(new Error('Network error'));
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(
@@ -280,11 +295,11 @@ describe('App', () => {
         },
       });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(screen.getByText('Test answer')).toBeInTheDocument();
@@ -303,11 +318,11 @@ describe('App', () => {
     it('clears error state when clear chat is clicked', async () => {
       mockAxiosPost.mockRejectedValueOnce(new Error('Network error'));
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(
@@ -316,9 +331,7 @@ describe('App', () => {
       });
 
       const clearButton = screen.getByRole('button', { name: /clear chat/i });
-      await act(async () => {
-        fireEvent.click(clearButton);
-      });
+      fireEvent.click(clearButton);
 
       expect(
         screen.queryByText('Failed to get response. Please try again.')
@@ -336,23 +349,29 @@ describe('App', () => {
           data: { answer: 'Answer 2', sources: [], processing_time_seconds: 2.0 },
         });
 
-      render(<App />);
+      const { container } = render(<App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'Question 1' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(screen.getByText('Answer 1')).toBeInTheDocument();
       });
 
       fireEvent.change(input, { target: { value: 'Question 2' } });
-      fireEvent.submit(input.closest('form'));
+      submitForm(container);
 
       await waitFor(() => {
         expect(screen.getByText('Question 1')).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(screen.getByText('Answer 1')).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(screen.getByText('Question 2')).toBeInTheDocument();
+      });
+      await waitFor(() => {
         expect(screen.getByText('Answer 2')).toBeInTheDocument();
       });
     });

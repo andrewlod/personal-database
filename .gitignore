@@ -29,6 +29,8 @@ htmlcov/
 .tox/
 .nox/
 .mypy_cache/
+src/web/test-results/
+src/web/playwright-report/
 
 # Node.js / React
 node_modules/

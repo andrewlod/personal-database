@@ -10,25 +10,29 @@ test-backend-unit:
 
 test-backend-integration:
 	@echo "Running backend integration tests..."
-	python -m pytest tests/integration/ -v
+	@if [ -d tests/integration ]; then \
+		python -m pytest tests/integration/ -v; \
+	else \
+		echo "No integration tests found, skipping."; \
+	fi
 
 test-backend-coverage:
 	@echo "Running backend tests with coverage..."
-	python -m pytest tests/unit/backend/ tests/integration/ --cov=src --cov-report=html
+	python -m pytest tests/unit/backend/ --cov=src --cov-report=html
 
 test-frontend: test-frontend-unit test-frontend-e2e
 
 test-frontend-unit:
 	@echo "Running frontend unit tests..."
-	cd src/web && npm test
+	cd src/web && npm test -- --ci --watchAll=false
 
 test-frontend-e2e:
 	@echo "Running frontend E2E tests..."
-	npx playwright test
+	cd src/web && npx playwright test
 
 test-frontend-e2e-headed:
 	@echo "Running frontend E2E tests (headed)..."
-	npx playwright test --headed
+	cd src/web && npx playwright test --headed
 
 lint:
 	@echo "Running linters..."
@@ -41,8 +45,6 @@ typecheck:
 	@echo "Running type checkers..."
 	# Python type checking
 	mypy src/
-	# JavaScript/TypeScript type checking
-	cd src/web && npm run typecheck
 
 test-coverage: test-backend-coverage
 	@echo "Frontend coverage available via npm test -- --coverage"

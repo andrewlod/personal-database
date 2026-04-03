@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { lightTheme, darkTheme } from '../theme';
+import { ThemeContext } from '../ThemeContext';
 import axios from 'axios';
 import App from '../App';
 
@@ -21,6 +24,17 @@ const submitForm = (container) => {
   fireEvent.submit(form);
 };
 
+const renderWithTheme = (theme, ui, mode = 'dark') => {
+  return render(
+    <ThemeContext.Provider value={{ mode, toggleTheme: jest.fn() }}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {ui}
+      </ThemeProvider>
+    </ThemeContext.Provider>
+  );
+};
+
 describe('App', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,34 +42,34 @@ describe('App', () => {
 
   describe('Initial render', () => {
     it('renders the empty state message', () => {
-      render(<App />);
+      renderWithTheme(darkTheme, <App />);
       expect(
         screen.getByText('Start by asking a question about your personal knowledge base.')
       ).toBeInTheDocument();
     });
 
     it('renders the text input field', () => {
-      render(<App />);
+      renderWithTheme(darkTheme, <App />);
       expect(
         screen.getByPlaceholderText('Ask a question about your knowledge base...')
       ).toBeInTheDocument();
     });
 
     it('renders the send button disabled initially', () => {
-      render(<App />);
+      renderWithTheme(darkTheme, <App />);
       const sendButton = screen.getByRole('button', { name: /send/i });
       expect(sendButton).toBeDisabled();
     });
 
     it('renders the clear chat button', () => {
-      render(<App />);
+      renderWithTheme(darkTheme, <App />);
       expect(screen.getByRole('button', { name: /clear chat/i })).toBeInTheDocument();
     });
   });
 
   describe('Input interaction', () => {
     it('enables send button when input has text', () => {
-      render(<App />);
+      renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
       const sendButton = screen.getByRole('button', { name: /send/i });
 
@@ -66,7 +80,7 @@ describe('App', () => {
     });
 
     it('disables send button when input is only whitespace', () => {
-      render(<App />);
+      renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
       const sendButton = screen.getByRole('button', { name: /send/i });
 
@@ -85,7 +99,7 @@ describe('App', () => {
         },
       });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -103,7 +117,7 @@ describe('App', () => {
         },
       });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -117,7 +131,7 @@ describe('App', () => {
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -135,7 +149,7 @@ describe('App', () => {
         },
       });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -151,7 +165,7 @@ describe('App', () => {
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -184,7 +198,7 @@ describe('App', () => {
         },
       });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -216,7 +230,7 @@ describe('App', () => {
         },
       });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -239,7 +253,7 @@ describe('App', () => {
         },
       });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -255,7 +269,7 @@ describe('App', () => {
     it('shows error alert when API call fails', async () => {
       mockAxiosPost.mockRejectedValueOnce(new Error('Network error'));
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -271,7 +285,7 @@ describe('App', () => {
     it('adds error bot message to chat on API failure', async () => {
       mockAxiosPost.mockRejectedValueOnce(new Error('Network error'));
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -295,7 +309,7 @@ describe('App', () => {
         },
       });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -318,7 +332,7 @@ describe('App', () => {
     it('clears error state when clear chat is clicked', async () => {
       mockAxiosPost.mockRejectedValueOnce(new Error('Network error'));
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'What is this?' } });
@@ -349,7 +363,7 @@ describe('App', () => {
           data: { answer: 'Answer 2', sources: [], processing_time_seconds: 2.0 },
         });
 
-      const { container } = render(<App />);
+      const { container } = renderWithTheme(darkTheme, <App />);
       const input = screen.getByPlaceholderText('Ask a question about your knowledge base...');
 
       fireEvent.change(input, { target: { value: 'Question 1' } });

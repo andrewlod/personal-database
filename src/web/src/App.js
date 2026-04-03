@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Container, Box, TextField, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, CircularProgress, Alert } from '@mui/material';
-import { ChatBubbleOutline, Send, Clear } from '@mui/icons-material';
+import { Container, Box, TextField, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography, CircularProgress, Alert, IconButton, useTheme } from '@mui/material';
+import { ChatBubbleOutline, Send, Clear, Brightness4, Brightness7 } from '@mui/icons-material';
 import Markdown from 'react-markdown';
+import { useThemeContext } from './ThemeContext';
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -10,8 +11,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
+  const theme = useTheme();
+  const { mode, toggleTheme } = useThemeContext();
 
-  // Scroll to bottom of messages when they change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -25,7 +27,6 @@ function App() {
     setError(null);
     setLoading(true);
 
-    // Add user message to chat
     const userMessage = {
       id: Date.now().toString(),
       text: question,
@@ -35,7 +36,6 @@ function App() {
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      // Call API
       const response = await axios.post('/api/query/', {
         question: question,
         top_k: 5
@@ -54,7 +54,6 @@ function App() {
       setError('Failed to get response. Please try again.');
       console.error('Query error:', err);
       
-      // Add error message to chat
       const errorMessage = {
         id: Date.now().toString() + 'e',
         text: 'Sorry, I encountered an error processing your question. Please try again.',
@@ -72,8 +71,26 @@ function App() {
     setError(null);
   };
 
+  const getMessageBoxStyle = (sender) => {
+    const colors = theme.palette.messageBox[sender];
+    return {
+      bgcolor: colors.bg,
+      borderColor: colors.border,
+    };
+  };
+
+  const sourceBoxBg = mode === 'dark' ? 'grey.900' : 'white';
+
   return (
-    <Container maxWidth="mx-auto" sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Container maxWidth="mx-auto" sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 3, py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h6" component="h1">
+          Personal Database
+        </Typography>
+        <IconButton onClick={toggleTheme} color="inherit" aria-label="toggle theme">
+          {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+        </IconButton>
+      </Box>
       <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 3 }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -82,9 +99,9 @@ function App() {
         )}
         <List>
           {messages.map((message, index) => (
-            <ListItem key={message.id} sx={{ mb: 2 }}>
+            <ListItem key={message.id} sx={{ mb: 2, ...getMessageBoxStyle(message.sender) }} data-testid={`message-${message.id}`}>
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: message.sender === 'user' ? '#1976d2' : '#388e3c' }}>
+                <Avatar sx={{ bgcolor: message.sender === 'user' ? theme.palette.primary.main : theme.palette.secondary.main }}>
                   {message.sender === 'user' ? <ChatBubbleOutline fontSize="small" /> : <Send fontSize="small" />}
                 </Avatar>
               </ListItemAvatar>
@@ -112,12 +129,12 @@ function App() {
                         </Typography>
                         <Markdown>{message.text}</Markdown>
                         {message.sources && message.sources.length > 0 && (
-                          <Box sx={{ mt: 2, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+                          <Box sx={{ mt: 2, p: 1, bgcolor: mode === 'dark' ? 'grey.800' : 'grey.50', borderRadius: 1 }}>
                             <Typography variant="caption" color="text.secondary" fontWeight="medium">
                               Sources ({message.sources.length}):
                             </Typography>
                             {message.sources.map((source, sourceIndex) => (
-                              <Box key={sourceIndex} sx={{ mb: 1, p: 0.5, bgcolor: 'white' }}>
+                              <Box key={sourceIndex} sx={{ mb: 1, p: 0.5, bgcolor: sourceBoxBg, borderRadius: 0.5 }}>
                                 <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>
                                   {source.title || 'Untitled'}
                                 </Typography>
@@ -159,7 +176,7 @@ function App() {
         <div ref={messagesEndRef} />
       </Box>
       
-      <Box sx={{ px: 3, pb: 2, borderTop: '1px solid grey.200', backgroundColor: 'background.paper' }}>
+      <Box sx={{ px: 3, pb: 2, borderTop: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' }}>
         <form onSubmit={sendMessage} sx={{ display: 'flex', gap: 2 }}>
           <TextField
             value={input}

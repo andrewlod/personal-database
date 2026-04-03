@@ -125,3 +125,66 @@ test.describe('Personal Database Chat', () => {
     await expect(page.getByText('(1.5s)')).toBeVisible();
   });
 });
+
+test.describe('Theme Toggle', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/query/', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          answer: 'This is a test answer from the knowledge base.',
+          sources: [],
+          processing_time_seconds: 1.5,
+        }),
+      });
+    });
+  });
+
+  test('theme toggle button is visible on page load', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('button', { name: /toggle theme/i })).toBeVisible();
+  });
+
+  test('clicking toggle changes the theme attribute', async ({ page }) => {
+    await page.goto('/');
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    const toggleButton = page.getByRole('button', { name: /toggle theme/i });
+    await toggleButton.click();
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  });
+
+  test('theme persists across page reload', async ({ page }) => {
+    await page.goto('/');
+
+    const toggleButton = page.getByRole('button', { name: /toggle theme/i });
+    await toggleButton.click();
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+    await page.reload();
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  });
+
+  test('message boxes have visible borders against background', async ({ page }) => {
+    await page.goto('/');
+
+    const input = page.getByPlaceholder('Ask a question about your knowledge base...');
+    await input.fill('What is this?');
+    await page.getByRole('button', { name: /send/i }).click();
+
+    await expect(page.getByText('What is this?')).toBeVisible();
+
+    const listItem = page.locator('[data-testid^="message-"]').first();
+    await expect(listItem).toBeVisible();
+
+    const borderWidth = await listItem.evaluate((el) => {
+      return window.getComputedStyle(el).borderWidth;
+    });
+    expect(borderWidth).not.toBe('0px');
+  });
+});

@@ -179,7 +179,9 @@ test.describe('Theme Toggle', () => {
 
     await expect(page.getByText('What is this?')).toBeVisible();
 
-    const listItem = page.locator('ul[role="list"] > li').first();
+    const listItem = page.locator('[data-testid^="message-"]').first();
+    await expect(listItem).toBeVisible();
+
     const borderWidth = await listItem.evaluate((el) => {
       return window.getComputedStyle(el).borderWidth;
     });

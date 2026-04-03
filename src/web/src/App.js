@@ -99,7 +99,7 @@ function App() {
         )}
         <List>
           {messages.map((message, index) => (
-            <ListItem key={message.id} sx={{ mb: 2, ...getMessageBoxStyle(message.sender) }}>
+            <ListItem key={message.id} sx={{ mb: 2, ...getMessageBoxStyle(message.sender) }} data-testid={`message-${message.id}`}>
               <ListItemAvatar>
                 <Avatar sx={{ bgcolor: message.sender === 'user' ? theme.palette.primary.main : theme.palette.secondary.main }}>
                   {message.sender === 'user' ? <ChatBubbleOutline fontSize="small" /> : <Send fontSize="small" />}

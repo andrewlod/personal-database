@@ -20,15 +20,15 @@ test-frontend: test-frontend-unit test-frontend-e2e
 
 test-frontend-unit:
 	@echo "Running frontend unit tests..."
-	cd src/web && npm test
+	cd src/web && npm test -- --ci --watchAll=false
 
 test-frontend-e2e:
 	@echo "Running frontend E2E tests..."
-	npx playwright test
+	cd src/web && npx playwright test
 
 test-frontend-e2e-headed:
 	@echo "Running frontend E2E tests (headed)..."
-	npx playwright test --headed
+	cd src/web && npx playwright test --headed
 
 lint:
 	@echo "Running linters..."

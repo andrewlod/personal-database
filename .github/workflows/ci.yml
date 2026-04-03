@@ -35,9 +35,7 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install mise
-        mise install
-        mise npm install
+        pip install -r requirements.txt
         cd src/web && npm ci
         
     - name: Run backend tests

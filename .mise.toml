@@ -1,0 +1,6 @@
+[tools]
+python = "3.11"
+node = "20"
+
+[env]
+PYTHONPATH = "src"

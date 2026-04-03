@@ -1,0 +1,72 @@
+# Personal Database Configuration
+#
+# Sensitive values (API keys) are loaded from environment variables or .env file.
+# See .env.example for required variables.
+
+# Vector Database Settings
+vector_db:
+  provider: "weaviate"  # Options: weaviate, pinecone, qdrant, chroma
+  weaviate:
+    host: "localhost"
+    port: 8080
+    scheme: "http"
+    index_name: "PersonalKnowledge"
+  pinecone:
+    environment: ""  # e.g., "us-west1-gcp"
+    index_name: "personal-db"
+
+# Embedding Model Settings
+embedding:
+  provider: "sentence_transformers"  # Options: sentence_transformers, openai, cohere, huggingface
+  model_name: "all-MiniLM-L6-v2"
+  device: "cpu"  # or "cuda" if GPU available
+  batch_size: 32
+
+# Chunking Settings
+chunking:
+  default_strategy: "semantic"  # Options: character, token, semantic, pattern
+  character:
+    chunk_size: 500
+    overlap: 50
+  token:
+    chunk_size: 100
+    overlap: 20
+  semantic:
+    chunk_size: 5  # number of sentences
+    overlap: 1
+  pattern:
+    separators: ["\n\n", "\n", ". ", "! ", "? "]  # paragraph, line, sentence
+
+# LLM Settings (via OpenRouter)
+# api_key is loaded from OPENROUTER_API_KEY environment variable
+llm:
+  provider: "openrouter"
+  model: "anthropic/claude-3-haiku"  # or other models
+  temperature: 0.7
+  max_tokens: 1000
+  top_p: 0.9
+
+# RAG Settings
+rag:
+  top_k: 5  # Number of chunks to retrieve
+  score_threshold: 0.7  # Minimum similarity score
+  max_context_length: 3000  # Maximum tokens for context
+
+# API Settings
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: true
+  cors_origins: ["http://localhost:3000"]  # React frontend
+
+# Processing Settings
+processing:
+  batch_size: 10
+  max_retries: 3
+  timeout_seconds: 30
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/personal-database.log"

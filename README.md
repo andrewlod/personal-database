@@ -78,6 +78,10 @@ python scripts/chunker.py parsed/ --strategy semantic -o chunks/
 
 # Generate embeddings and store in Weaviate
 python scripts/embedder.py chunks/
+
+# Wipe all data from Weaviate
+python scripts/wipe_db.py
+python scripts/wipe_db.py -y  # Skip confirmation prompt
 ```
 
 ## API Endpoints

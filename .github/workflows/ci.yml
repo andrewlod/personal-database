@@ -13,9 +13,10 @@ jobs:
         image: semitechnologies/weaviate:1.24.0
         ports:
           - 8080:8080
-        options: >-
-          --host http://localhost:8080
-          --scheme http
+        env:
+          QUERY_DEFAULTS_LIMIT: 25
+          AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+          PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
           
     steps:
     - uses: actions/checkout@v4

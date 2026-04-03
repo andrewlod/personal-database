@@ -177,14 +177,12 @@ test.describe('Theme Toggle', () => {
     await input.fill('What is this?');
     await page.getByRole('button', { name: /send/i }).click();
 
-    const userMessage = page.getByText('What is this?');
-    await expect(userMessage).toBeVisible();
+    await expect(page.getByText('What is this?')).toBeVisible();
 
-    const userMessageListItem = userMessage.locator('..').locator('..');
-    const bgColor = await userMessageListItem.evaluate((el) => {
-      return window.getComputedStyle(el).backgroundColor;
+    const listItem = page.locator('ul[role="list"] > li').first();
+    const borderWidth = await listItem.evaluate((el) => {
+      return window.getComputedStyle(el).borderWidth;
     });
-    expect(bgColor).not.toBe('rgba(0, 0, 0, 0)');
-    expect(bgColor).not.toBe('transparent');
+    expect(borderWidth).not.toBe('0px');
   });
 });

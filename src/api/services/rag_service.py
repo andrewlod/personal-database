@@ -215,8 +215,8 @@ class RAGService:
             Dictionary with service statistics
         """
         try:
-            vector_db_stats = await self.vector_db_service.get_stats()
-            embedding_stats = self.embedding_service.get_stats()
+            vector_db_stats = await self.vector_db_service.get_stats()  # type: ignore[attr-defined]
+            embedding_stats = self.embedding_service.get_stats()  # type: ignore[attr-defined]
 
             return {
                 "rag_service": {

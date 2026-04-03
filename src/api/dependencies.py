@@ -2,14 +2,16 @@
 Dependency providers for the Personal Database API.
 """
 
+from typing import Optional
+
 from .services.vector_db_service import VectorDBService
 from .services.embedding_service import EmbeddingService
 from .services.rag_service import RAGService
 
 # Global service instances
-_vector_db_service: VectorDBService = None
-_embedding_service: EmbeddingService = None
-_rag_service: RAGService = None
+_vector_db_service: Optional[VectorDBService] = None
+_embedding_service: Optional[EmbeddingService] = None
+_rag_service: Optional[RAGService] = None
 
 
 def get_vector_db_service() -> VectorDBService:

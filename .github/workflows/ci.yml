@@ -6,64 +6,118 @@ on:
   pull_request:
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
-    services:
-      weaviate:
-        image: semitechnologies/weaviate:1.24.0
-        ports:
-          - 8080:8080
-        env:
-          QUERY_DEFAULTS_LIMIT: 25
-          AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
-          PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-          
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
         cache: 'pip'
-        
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: "20"
         cache: 'npm'
         cache-dependency-path: src/web/package-lock.json
-        
+
+    - name: Install Python deps
+      run: |
+        pip install torch==2.3.0+cpu --index-url https://download.pytorch.org/whl/cpu
+        pip install -r <(grep -v '^torch' requirements.txt)
+
+    - name: Install Node deps
+      run: cd src/web && npm ci
+
+    - name: Lint
+      run: make lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        cache: 'pip'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: 'npm'
+        cache-dependency-path: src/web/package-lock.json
+
+    - name: Install Python deps
+      run: |
+        pip install torch==2.3.0+cpu --index-url https://download.pytorch.org/whl/cpu
+        pip install -r <(grep -v '^torch' requirements.txt)
+
+    - name: Install Node deps
+      run: cd src/web && npm ci
+
+    - name: Type check
+      run: make typecheck
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        cache: 'pip'
+
     - name: Install dependencies
       run: |
         pip install torch==2.3.0+cpu --index-url https://download.pytorch.org/whl/cpu
         pip install -r <(grep -v '^torch' requirements.txt)
-        cd src/web && npm ci
-        
+
     - name: Run backend tests
       run: make test-backend
-      
-    - name: Run frontend tests
-      run: |
-        cd src/web
-        npm test -- --ci --coverage
-        
-    - name: Run E2E tests
-      run: |
-        cd src/web
-        npx playwright install --with-deps chromium
-        npx playwright test
-        
-    - name: Upload coverage
-      uses: actions/upload-artifact@v4
+
+  frontend-unit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
       with:
-        name: coverage-report
-        path: |
-          htmlcov/
-          src/web/coverage/
-          
-    - name: Lint check
-      run: make lint
-      
-    - name: Type check
-      run: make typecheck
+        node-version: "20"
+        cache: 'npm'
+        cache-dependency-path: src/web/package-lock.json
+
+    - name: Install dependencies
+      run: cd src/web && npm ci
+
+    - name: Run unit tests
+      run: cd src/web && npm test -- --ci --watchAll=false
+
+  frontend-e2e:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: 'npm'
+        cache-dependency-path: src/web/package-lock.json
+
+    - name: Install dependencies
+      run: cd src/web && npm ci
+
+    - name: Install Playwright browsers
+      run: cd src/web && npx playwright install --with-deps chromium
+
+    - name: Run E2E tests
+      run: cd src/web && npx playwright test

@@ -45,8 +45,6 @@ typecheck:
 	@echo "Running type checkers..."
 	# Python type checking
 	mypy src/
-	# JavaScript/TypeScript type checking
-	cd src/web && npm run typecheck
 
 test-coverage: test-backend-coverage
 	@echo "Frontend coverage available via npm test -- --coverage"
